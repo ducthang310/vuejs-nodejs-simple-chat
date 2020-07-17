@@ -1,13 +1,19 @@
 <template>
   <div>
     hello chat app
-    <input type="text" v-model="message"/>
-    <button @click="clickButton()">Send Msg</button>
+    <form v-on:submit.prevent="clickButton">
+      <input type="text" v-model="message"/>
+      <button type="submit">Send Msg</button>
+    </form>
+
     <p>Chat board</p>
-    <ul>
-      <li></li>
+    <ul class="messages">
+      <li class="message" v-for="item in items" :key="item.message" v-bind:class="{ 'myself': item.myself }">
+        <span v-if="!item.myself">Other: </span> {{ item.message }}
+      </li>
     </ul>
   </div>
+
 </template>
 
 <script>
@@ -18,33 +24,45 @@
         console.log('socket connected')
       },
       chatMessage: function(data) {
-        console.log(data)
-        console.log('this method was fired by the socket server. eg: io.emit("chatMessage", data)')
+        console.log(data);
+        data.myself = data.socket_id === this.$socket.client.id;
+        this.items.push(data);
       }
     },
     methods: {
       clickButton: function () {
-        console.log('button clicked');
-        console.log(this.message);
-        // $socket is socket.io-client instance
         this.$socket.client.emit('chatMessage', this.message);
+        this.message = null;
       }
     },
     data: () => {
       return {
         message: '',
+        items: []
       };
     },
     computed: {
 
-    },
-    mounted() {
-      // this.$socket.on('chatMessage',data => {
-      //   console.log('listen fired')
-      //   console.log(data);
-      //
-      // });
-
     }
   }
 </script>
+<style>
+  body {
+    background: #f6f6f6;
+  }
+  .messages {
+    list-style: none;
+    border: 1px solid #e4e4e4;
+    background: #ffffff;
+    padding: 15px;
+    width: 350px;
+    min-height: 100px;
+  }
+  .message {
+    width: 100%;
+    padding: 5px 0;
+  }
+  .myself {
+    text-align: right;
+  }
+</style>

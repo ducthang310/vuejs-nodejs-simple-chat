@@ -9,9 +9,8 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log('user disconnected');
     });
-    socket.on('chatMessage', (msg) => {
-        console.log('chatMessage: ' + msg);
-        io.emit('chatMessage', '--yay server: ' + msg);
+    socket.on('chatMessage', (message) => {
+        io.emit('chatMessage', {socket_id: socket.id, message});
     });
 })
 
